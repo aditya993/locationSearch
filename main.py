@@ -9,34 +9,32 @@ app = Flask(__name__)
 # Convert city name to lat/lon
 # -----------------------------
 def get_coordinates(location):
-    url = "https://nominatim.openstreetmap.org/search"
+    url = "https://geocoding-api.open-meteo.com/v1/search"
 
     params = {
-        "q": location,
-        "format": "json",
-        "limit": 1
-    }
-
-    headers = {
-        "User-Agent": "SmartShopFinderApp/1.0 (your-email@example.com)"
+        "name": location,
+        "count": 1,
+        "language": "en",
+        "format": "json"
     }
 
     try:
-        response = requests.get(url, params=params, headers=headers, timeout=10)
+        response = requests.get(url, params=params, timeout=10)
 
         if response.status_code != 200:
             return None, None
 
         data = response.json()
 
-        if not data:
+        if "results" not in data or not data["results"]:
             return None, None
 
-        return float(data[0]["lat"]), float(data[0]["lon"])
+        return data["results"][0]["latitude"], data["results"][0]["longitude"]
 
     except Exception as e:
         print("Geocoding error:", e)
         return None, None
+
 
 
 # -----------------------------
